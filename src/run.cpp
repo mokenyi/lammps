@@ -48,7 +48,7 @@ void Run::command(int narg, char **arg)
   if (narg < 1) error->all(FLERR,"Illegal run command");
 
   if (domain->box_exist == 0)
-    error->all(FLERR,"Run command before simulation box is defined");
+    error->all(FLERR,"run::command(): before simulation box is defined");
 
   // ignore run command, if walltime limit was already reached
 
@@ -56,13 +56,15 @@ void Run::command(int narg, char **arg)
   if (timer->is_timeout()) return;
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"timer->is_timeout() in %10.8es\n",dt.count()*1e-3); 
+  fprintf(screen,"run::command(): timer->is_timeout() in %10.8es\n",
+    dt.count()*1e-3); 
 
   tic=std::chrono::steady_clock::now();
   bigint nsteps_input = utils::bnumeric(FLERR,arg[0],false,lmp);
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"utils::bnumeric() in %10.8es\n",dt.count()*1e-3); 
+  fprintf(screen,"run::command(): utils::bnumeric() in %10.8es\n",
+    dt.count()*1e-3); 
 
   // parse optional args
   tic=std::chrono::steady_clock::now();
@@ -123,7 +125,8 @@ void Run::command(int narg, char **arg)
   }
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Parsed optional args in %10.8es\n",dt.count()*1e-3); 
+  fprintf(screen,"Run::command(): parsed optional args in %10.8es\n",
+    dt.count()*1e-3); 
 
   // set nsteps as integer, using upto value if specified
 
@@ -157,7 +160,7 @@ void Run::command(int narg, char **arg)
 
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Set nsteps in %10.8es\n",dt.count()*1e-3); 
+  fprintf(screen,"Run::command(): set nsteps in %10.8es\n",dt.count()*1e-3); 
   if (!preflag && strstr(update->integrate_style,"respa"))
     error->all(FLERR,"Run flag 'pre no' not compatible with r-RESPA");
 
@@ -178,7 +181,8 @@ void Run::command(int narg, char **arg)
   }
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Copied commands in %10.8es\n",dt.count()*1e-3); 
+  fprintf(screen,"Run::command(): copied commands in %10.8es\n",
+    dt.count()*1e-3); 
 
   // perform a single run
   // use start/stop to set begin/end step
@@ -189,7 +193,6 @@ void Run::command(int narg, char **arg)
   update->whichflag = 1;
   timer->init_timeout();
 
-  tic=std::chrono::steady_clock::now();
   if (nevery == 0) {
     tic=std::chrono::steady_clock::now();
     update->nsteps = nsteps;
@@ -199,8 +202,8 @@ void Run::command(int narg, char **arg)
       error->all(FLERR,"Too many timesteps");
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"Checked number of steps to iterate in %10.8es\n",
-      dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): checked number of steps to iterate in "
+      "%10.8es\n",dt.count()*1e-3); 
 
     tic=std::chrono::steady_clock::now();
     if (startflag) update->beginstep = start;
@@ -209,7 +212,8 @@ void Run::command(int narg, char **arg)
     else update->endstep = update->laststep;
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"Set update->*steps() in %10.8es\n",dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): set update->*steps() in %10.8es\n",
+      dt.count()*1e-3); 
 
     tic=std::chrono::steady_clock::now();
     if (preflag || update->first_update == 0) {
@@ -218,7 +222,7 @@ void Run::command(int narg, char **arg)
     } else output->setup(0);
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"setup() in %10.8es\n",dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): setup() in %10.8es\n",dt.count()*1e-3); 
 
     tic=std::chrono::steady_clock::now();
     timer->init();
@@ -227,20 +231,23 @@ void Run::command(int narg, char **arg)
     timer->barrier_stop();
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"update->integrate->run() in %10.8es\n",dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): update->integrate->run() in %10.8es\n",
+      dt.count()*1e-3); 
 
     tic=std::chrono::steady_clock::now();
     update->integrate->cleanup();
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"update->integrate->cleanup() in %10.8es\n",dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): update->integrate->cleanup() in %10.8es\n",
+      dt.count()*1e-3); 
 
     tic=std::chrono::steady_clock::now();
     Finish finish(lmp);
     finish.end(postflag);
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"finish.end() in %10.8es\n",dt.count()*1e-3); 
+    fprintf(screen,"Run::command(): finish.end() in %10.8es\n",
+      dt.count()*1e-3); 
 
   // perform multiple runs optionally interleaved with invocation command(s)
   // use start/stop to set begin/end step
@@ -297,9 +304,6 @@ void Run::command(int narg, char **arg)
       iter++;
     }
   }
-  toc=std::chrono::steady_clock::now();
-  dt=toc-tic;
-  fprintf(screen,"Iterated steps in %10.8es\n",dt.count()*1e-3); 
 
   update->whichflag = 0;
   update->firststep = update->laststep = 0;
