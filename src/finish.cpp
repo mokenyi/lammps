@@ -84,8 +84,11 @@ void Finish::end(int flag)
   MPI_Allreduce(&nblocal,&atom->natoms,1,MPI_LMP_BIGINT,MPI_SUM,world);
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): MPI_Allreduce(atoms) in %10.8es\n",
+  const size_t bufsize(512);
+  char buf[bufsize];
+  snprintf(buf,bufsize,"Finish::end(): MPI_Allreduce(atoms) in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 
   // choose flavors of statistical output
   // flag determines caller
@@ -116,8 +119,9 @@ void Finish::end(int flag)
   if (flag == 4) hyperflag = timeflag = histoflag = neighflag = 1;
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): Set flags in %10.8es\n",
+  snprintf(buf,bufsize,"Finish::end(): Set flags in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 
   // loop stats
 
@@ -134,8 +138,9 @@ void Finish::end(int flag)
     cpu_loop = tmp/nprocs;
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"Finish::end(): MPI_Allreduce(loop times) in %10.8es\n",
+    snprintf(buf,bufsize,"Finish::end(): MPI_Allreduce(loop times) in %10.8es\n",
       dt.count()*1e-3); 
+    utils::logmesg(lmp,buf);
     if (time_loop > 0.0) cpu_loop = cpu_loop/time_loop*100.0;
 
     if (me == 0) {
@@ -198,8 +203,9 @@ void Finish::end(int flag)
       }
       toc=std::chrono::steady_clock::now();
       dt=toc-tic;
-      fprintf(screen,"Finish::end(): Print loop times in %10.8es\n",
+      snprintf(buf,bufsize,"Finish::end(): Print loop times in %10.8es\n",
         dt.count()*1e-3); 
+      utils::logmesg(lmp,buf);
     }
   }
 
@@ -393,8 +399,9 @@ void Finish::end(int flag)
     }
     toc=std::chrono::steady_clock::now();
     dt=toc-tic;
-    fprintf(screen,"Finish::end(): Print MPI timing breakdown in %10.8es\n",
+    snprintf(buf,bufsize,"Finish::end(): Print MPI timing breakdown in %10.8es\n",
       dt.count()*1e-3); 
+    utils::logmesg(lmp,buf);
   }
 
 #ifdef LMP_USER_OMP
@@ -496,8 +503,9 @@ void Finish::end(int flag)
   }
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): Print FFT times in %10.8es\n",
+  snprintf(buf,bufsize,"Finish::end(): Print FFT times in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 
   tic=std::chrono::steady_clock::now();
   if (histoflag) {
@@ -582,8 +590,9 @@ void Finish::end(int flag)
   }
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): Print histogram in %10.8es\n",
+  snprintf(buf,bufsize,"Finish::end(): Print histogram in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 
   tic=std::chrono::steady_clock::now();
   if (neighflag) {
@@ -637,15 +646,17 @@ void Finish::end(int flag)
   }
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): Print neighbours in %10.8es\n",
+  snprintf(buf,bufsize,"Finish::end(): Print neighbours in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 
   tic=std::chrono::steady_clock::now();
   if (logfile) fflush(logfile);
   toc=std::chrono::steady_clock::now();
   dt=toc-tic;
-  fprintf(screen,"Finish::end(): Flush logfile in %10.8es\n",
+  snprintf(buf,bufsize,"Finish::end(): Flush logfile in %10.8es\n",
     dt.count()*1e-3); 
+  utils::logmesg(lmp,buf);
 }
 
 /* ---------------------------------------------------------------------- */
